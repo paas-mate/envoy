@@ -1,14 +1,16 @@
-FROM ttbb/base
+FROM shoothzj/base
 
-WORKDIR /opt/sh
+WORKDIR /opt
 
-RUN dnf install -y yum-utils && \
-rpm --import 'https://rpm.dl.getenvoy.io/public/gpg.CF716AF503183491.key' && \
-curl -sL 'https://rpm.dl.getenvoy.io/public/config.rpm.txt?distro=el&codename=7' > /tmp/tetrate-getenvoy-rpm-stable.repo && \
-yum-config-manager --add-repo '/tmp/tetrate-getenvoy-rpm-stable.repo' && \
-dnf makecache -y --disablerepo='*' --enablerepo='tetrate-getenvoy-rpm-stable' && \
-dnf install -y getenvoy-envoy
+RUN sudo apt update && \
+    sudo apt install -y apt-transport-https gnupg2 curl lsb-release && \
+    curl -sL 'https://deb.dl.getenvoy.io/public/gpg.8115BA8E629CC074.key' | sudo gpg --dearmor -o /usr/share/keyrings/getenvoy-keyring.gpg && \
+    echo a077cb587a1b622e03aa4bf2f3689de14658a9497a9af2c427bba5f4cc3c4723 /usr/share/keyrings/getenvoy-keyring.gpg | sha256sum --check && \
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/getenvoy-keyring.gpg] https://deb.dl.getenvoy.io/public/deb/ubuntu $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/getenvoy.list && \
+    sudo apt update && \
+    sudo apt install -y getenvoy-envoy && \
+    sudo apt clean
 
-ENV ENVOY_HOME /opt/sh/envoy
+ENV ENVOY_HOME /opt/envoy
 
-WORKDIR /opt/sh/envoy
+WORKDIR /opt/envoy
